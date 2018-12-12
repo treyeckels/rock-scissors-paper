@@ -7,21 +7,38 @@ var hasPlayer1 = false;
 var hasPlayer2 = false;
 var isPlayer1 = false;
 var isPlayer2 = false;
+var numPlayers = 0;
 
 players.on('value', snapshot => {
+	console.log('players changed');
 	const val = snapshot.val();
+	if (val.p1.status === 'online') {
+		hasPlayer1 = true;
+	}
+	if (val.p2.status === 'online') {
+		hasPlayer2 = true;
+	}
+
+	if (val.p1.status === 'offline') {
+		hasPlayer1 = false;
+	}
+
+	if (val.p2.status === 'offline') {
+		hasPlayer2 = false;
+	}
+
+	startGame();
+
 	if (val.p1.status === 'offline' && !isPlayer2) {
 		isPlayer1 = true;
 		p1.update({
 			status: 'online'
 		});
-		startGame();
 	} else if (val.p2.status === 'offline' && !isPlayer1) {
 		isPlayer2 = true;
 		p2.update({
 			status: 'online'
 		});
-		startGame();
 	}
 });
 
@@ -36,10 +53,24 @@ p2.onDisconnect().update({
 function startGame() {
 	console.log('1', isPlayer1);
 	console.log('2', isPlayer2);
-	const text = isPlayer1
-		? 'Welcome Player 1'
-		: isPlayer2
-			? 'Welcome Player 2'
-			: 'Waiting for more players...';
+	let text = 'Welcome Player ';
+	if (isPlayer1) {
+		text += '1';
+	} else {
+		text += '2';
+	}
+
+	if (!hasPlayer1 || !hasPlayer2) {
+		console.log('waiting for players');
+	}
+
+	if (hasPlayer1 && hasPlayer2) {
+		play();
+	}
+
 	document.getElementById('app').innerText = text;
+}
+
+function play() {
+	console.log('play');
 }
